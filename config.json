@@ -23,7 +23,7 @@
       "match": {
         "any": [
           { "phrase": "michael jordan" },
-          { "contains": "michael" }
+          { "contains": "a" }
         ]
       },
       "emails": ["cody.themagichub@gmail.com"]
