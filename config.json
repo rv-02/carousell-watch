@@ -1,0 +1,32 @@
+{
+  "baseUrl": "https://www.carousell.com.my",
+  "alerts": [
+    {
+      "id": "chainsaw-poster",
+      "sources": [
+        "https://www.carousell.com.my/search/products/?query=chainsaw&sort_by=time_created,desc",
+        "https://www.carousell.com.my/search/products/?query=poster&sort_by=time_created,desc"
+      ],
+      "match": {
+        "all": [
+          { "contains": "chainsaw" },
+          { "contains": "poster" }
+        ]
+      },
+      "emails": ["rvfrombasement@gmail.com", "rv02.axie@gmail.com"]
+    },
+    {
+      "id": "mj-phrase-or-michael",
+      "sources": [
+        "https://www.carousell.com.my/search/products/?query=michael%20jordan&sort_by=time_created,desc"
+      ],
+      "match": {
+        "any": [
+          { "phrase": "michael jordan" },
+          { "contains": "michael" }
+        ]
+      },
+      "emails": ["567@gmail.com", "789@gmail.com"]
+    }
+  ]
+}
