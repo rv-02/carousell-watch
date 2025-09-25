@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: "20"
 
-      - run: npm i playwright nodemailer
+      - run: npm i --no-save playwright nodemailer
       - run: npx playwright install --with-deps chromium
 
       - name: Run watcher
@@ -30,12 +30,21 @@ jobs:
           # TG_CHAT:  ${{ secrets.TG_CHAT }}
         run: node watch.js
 
-      - name: Commit state
+      - name: Commit state (only if seen.json changed)
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
+          # Clean up transient files so the repo isn't dirty
+          git restore package.json || true
+          rm -f package-lock.json || true
+          rm -rf node_modules || true
+
+          # Only commit if seen.json has diffs
+          if [ -f seen.json ] && ! git diff --quiet -- seen.json; then
             git config user.name "github-actions"
             git config user.email "actions@users.noreply.github.com"
             git add seen.json
             git commit -m "Update seen.json [skip ci]"
             git push
+          else
+            echo "No changes in seen.json; skipping commit."
           fi
+          
