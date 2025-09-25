@@ -21,12 +21,13 @@ jobs:
 
       - name: Run watcher
         env:
-        
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          FORCE_ALL_MATCHES: "1"
+
           # TG_TOKEN: ${{ secrets.TG_TOKEN }}
           # TG_CHAT:  ${{ secrets.TG_CHAT }}
         run: node watch.js
