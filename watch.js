@@ -39,22 +39,49 @@ async function extractListings(page) {
 }
 
 async function sendEmail(toList, subject, body) {
-  if (!toList || toList.length === 0) return;
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: false,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-  });
-  await transporter.sendMail({
-    from: process.env.FROM_EMAIL,
-    to: toList.join(','),
-    subject,
-    text: body
-  });
+  if (!toList || toList.length === 0) {
+    console.log('sendEmail: no recipients, skipping.');
+    return;
+  }
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure: false,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+    });
+
+    // Optional: verify connection/auth before sending
+    await transporter.verify();
+    console.log('SMTP verify: OK as', process.env.SMTP_USER);
+
+    const info = await transporter.sendMail({
+      from: process.env.FROM_EMAIL,
+      to: toList.join(','),
+      subject,
+      text: body
+    });
+    console.log('Email queued:', info.messageId, 'to', toList.join(','));
+  } catch (err) {
+    console.error('sendEmail ERROR:', err);
+    throw err; // surface to workflow logs
+  }
 }
 
 async function main() {
+    // --- one-time SMTP test mode ---
+  if (process.env.FORCE_TEST_EMAIL === '1') {
+    const allRecipients = (CONFIG.alerts || []).flatMap(a => a.emails || []);
+    const uniqRecipients = [...new Set(allRecipients)];
+    await sendEmail(
+      uniqRecipients,
+      'Carousell Watch: SMTP test',
+      'If you can read this, SMTP is working.'
+    );
+    console.log('Test email attempted to:', uniqRecipients.join(', '));
+    return; // exit early for this run
+  }
+
   const seen = loadSeen();
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
