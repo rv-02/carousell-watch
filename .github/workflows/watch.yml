@@ -27,7 +27,6 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
-          FORCE_TEST_EMAIL: "1"
           # TG_TOKEN: ${{ secrets.TG_TOKEN }}
           # TG_CHAT:  ${{ secrets.TG_CHAT }}
         run: node watch.js
