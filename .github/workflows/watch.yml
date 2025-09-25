@@ -1,0 +1,41 @@
+name: Carousell Watch
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - run: npm i playwright nodemailer
+      - run: npx playwright install --with-deps chromium
+
+      - name: Run watcher
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          # TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          # TG_CHAT:  ${{ secrets.TG_CHAT }}
+        run: node watch.js
+
+      - name: Commit state
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions"
+            git config user.email "actions@users.noreply.github.com"
+            git add seen.json
+            git commit -m "Update seen.json [skip ci]"
+            git push
+          fi
